@@ -137,6 +137,7 @@ audio{width:100%;height:40px;margin:6px 0}
 .seg{display:flex;background:var(--card);border-radius:12px;padding:3px;border:1px solid var(--line)}
 .seg button{flex:1;padding:7px 0;border-radius:9px;font-size:14px;color:var(--sub)}
 .seg button.on{background:var(--pri);color:var(--pri-ink);font-weight:600}
+.seg.grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
 /* sheet */
 #sheet{position:fixed;inset:0;background:rgba(10,14,25,.45);z-index:40;display:none;align-items:flex-end;justify-content:center}
 #sheet.on{display:flex}
@@ -214,7 +215,7 @@ const DB = {
 /* ================= 상태 ================= */
 const S = {
   tab: 'home',
-  settings: { rate: 0.95, mode: 'both', showText: false, voice: '' },
+  settings: { rate: 0.95, mode: 'both', showText: false, voice: '', aiModel: 'tiny' },
   vocab: { known: {}, unknown: {}, star: {} },
   sessions: [],
   vui: { cat: 'all', mode: 'list', q: '', front: 'en', deck: null, idx: 0, flipped: false },
@@ -272,12 +273,12 @@ class Answer {
         this.mr.start(1000);
       } catch (e) { this.recErr = e.name === 'NotAllowedError' ? '마이크 권한이 없어요' : '녹음을 시작하지 못했어요'; }
     }
-    if (mode !== 'rec') {
+    if (mode === 'both' || mode === 'stt') {
       if (!SR) this.sttErr = '이 브라우저는 받아쓰기를 지원하지 않아요 (크롬 권장)';
       else this.startSR();
     }
     this.t0 = Date.now();
-    if (this.recErr && (mode === 'rec' || this.sttErr)) { this.active = false; throw new Error(this.recErr); }
+    if (this.recErr && (mode === 'rec' || mode === 'ai' || this.sttErr)) { this.active = false; throw new Error(this.recErr); }
   }
   startSR() {
     const r = new SR(); this.sr = r;
@@ -314,6 +315,95 @@ class Answer {
     return { sec, blob, transcript: this.text(), sttErr: this.sttErr, recErr: this.recErr };
   }
   abort() { this.active = false; try { this.sr && this.sr.abort(); } catch (e) {} try { this.mr && this.mr.state !== 'inactive' && this.mr.stop(); } catch (e) {} if (this.stream) this.stream.getTracks().forEach(t => t.stop()); }
+}
+
+/* ================= 기기 안 AI 받아쓰기 (녹음이 끝난 뒤 글자로) =================
+ * 녹음과 받아쓰기를 동시에 못 하는 휴대폰용. asr-worker.js 가 Whisper 모델로 녹음을 글자로 바꾼다. */
+const AI_MODELS = {
+  tiny: { id: 'Xenova/whisper-tiny.en', name: '빠르게', size: '약 40MB' },
+  base: { id: 'Xenova/whisper-base.en', name: '정확하게', size: '약 80MB' }
+};
+const AI = {
+  w: null, seq: 0, jobs: {}, files: {}, chain: Promise.resolve(), listeners: new Set(), state: 'idle', pct: 0, err: '',
+  worker() {
+    if (this.w) return this.w;
+    this.w = new Worker('asr-worker.js', { type: 'module' });
+    this.w.onmessage = e => {
+      const m = e.data;
+      if (m.type === 'progress') {
+        const p = m.p;
+        if (p.file && p.total) this.files[p.file] = { l: p.loaded || 0, t: p.total };
+        if (p.status === 'progress' || p.status === 'initiate' || p.status === 'download') this.state = 'downloading';
+        const fs = Object.values(this.files), t = fs.reduce((a, f) => a + f.t, 0);
+        this.pct = t ? Math.min(100, Math.round(fs.reduce((a, f) => a + f.l, 0) / t * 100)) : 0;
+        return this.emit();
+      }
+      const j = this.jobs[m.id]; if (!j) return;
+      if (m.type === 'working') { this.state = 'working'; return this.emit(); }
+      delete this.jobs[m.id];
+      if (m.type === 'done') { this.state = 'ready'; this.err = ''; this.emit(); j.res(m.text); }
+      else {
+        const msg = /locate file|fetch|network|load/i.test(m.message) ? 'AI 모델을 내려받지 못했어요. 인터넷 연결을 확인하고 다시 해 보세요' : m.message;
+        this.state = 'error'; this.err = msg; this.emit(); j.rej(new Error(msg));
+      }
+    };
+    this.w.onerror = e => {
+      e.preventDefault && e.preventDefault();
+      this.state = 'error'; this.err = 'AI를 불러오지 못했어요. 인터넷 연결을 확인해 주세요';
+      Object.values(this.jobs).forEach(j => j.rej(new Error(this.err))); this.jobs = {}; this.w = null; this.emit();
+    };
+    return this.w;
+  },
+  emit() { this.listeners.forEach(f => { try { f(); } catch (e) {} }); },
+  send(msg, transfer) { return new Promise((res, rej) => { const id = ++this.seq; this.jobs[id] = { res, rej }; this.worker().postMessage({ ...msg, id }, transfer || []); }); },
+  queue(fn) { const p = this.chain.then(fn, fn); this.chain = p.catch(() => {}); return p; },
+  modelId() { return (AI_MODELS[S.settings.aiModel] || AI_MODELS.tiny).id; },
+  preload() { return this.queue(() => this.send({ cmd: 'preload', model: this.modelId() })); },
+  async decode(blob) {
+    // 녹음 파일을 Whisper 가 읽는 형식(16kHz 한 채널 소리 데이터)으로 바꾼다
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC();
+    let buf; try { buf = await ctx.decodeAudioData(await blob.arrayBuffer()); } finally { ctx.close && ctx.close(); }
+    const off = new OfflineAudioContext(1, Math.max(1, Math.ceil(buf.duration * 16000)), 16000);
+    const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
+    return new Float32Array((await off.startRendering()).getChannelData(0));
+  },
+  transcribe(blob) {
+    return this.queue(async () => {
+      let audio; try { audio = await this.decode(blob); } catch (e) { throw new Error('녹음 파일을 읽지 못했어요'); }
+      return this.send({ cmd: 'run', model: this.modelId(), audio }, [audio.buffer]);
+    });
+  },
+  busy() { return Object.keys(this.jobs).length > 0; },
+  status() {
+    if (this.state === 'downloading') return this.pct >= 100 ? 'AI 모델 준비하는 중…' : `AI 모델 내려받는 중… ${this.pct}% (처음 한 번만)`;
+    if (this.state === 'error' && !this.busy()) return '오류: ' + this.err;
+    if (this.busy()) return 'AI가 녹음을 글자로 바꾸는 중…';
+    if (this.state === 'ready' || this.state === 'working') return 'AI 준비 완료';
+    return '아직 준비 전 (처음 쓸 때 한 번 내려받아요)';
+  }
+};
+AI.listeners.add(() => document.querySelectorAll('.ai-status').forEach(el => { el.textContent = '🤖 ' + AI.status(); }));
+function aiTranscribe(item) {
+  if (!item.audio || item.aiBusy) return;
+  item.aiBusy = true; item.aiErr = ''; refreshItem(item);
+  AI.transcribe(item.audio).then(text => {
+    item.transcript = text;
+    item.stats = text ? analyze(text, item.sec, item.isFollow ? null : QMAP[item.qid]) : null;
+    if (!text) item.aiErr = '알아들을 수 있는 말이 없었어요';
+  }, err => { item.aiErr = err.message; }).finally(() => {
+    item.aiBusy = false;
+    const s = S.sessions.find(x => x.items.includes(item)); if (s) DB.put('sessions', s).catch(() => {});
+    refreshItem(item);
+  });
+}
+function refreshItem(item) {
+  if (!viewing || !stage.classList.contains('on')) return;
+  const idx = viewing.items.indexOf(item); const el = document.getElementById('item-' + idx);
+  if (idx < 0 || !el) return;
+  const open = el.querySelector('details') && el.querySelector('details').open;
+  el.outerHTML = itemCard(item, idx, viewing.kind === 'exam');
+  const nd = document.getElementById('item-' + idx).querySelector('details'); if (nd && open) nd.open = true;
 }
 
 /* ================= 답변 분석 ================= */
@@ -355,8 +445,8 @@ function feedback(item) {
     if (st.fillers >= 4) out.push({ t: 'tip', m: `"um, uh, you know" 같은 군말이 ${st.fillers}번 들렸어요. 잠깐 멈추는 게 더 나아요.` });
     if (st.wc >= 20 && st.uniq / st.wc < 0.45) out.push({ t: 'tip', m: '같은 단어가 자주 반복돼요. 단어장의 비슷한 표현을 써 보세요.' });
     if (st.keysUsed.length) out.push({ t: 'good', m: `핵심 표현을 썼어요: ${st.keysUsed.join(' · ')}` });
-  } else if (S.settings.mode !== 'rec') {
-    out.push({ t: 'tip', m: '받아쓰기 결과가 없어요. 녹음을 들으며 스스로 점검해 보세요.' });
+  } else if (!item.audio) {
+    out.push({ t: 'tip', m: '받아쓰기 결과가 없어요. 다음엔 또박또박 크게 말해 보세요.' });
   }
   return out;
 }
@@ -463,10 +553,17 @@ async function micTest(btn) {
   try { await a.start(); } catch (e) { box.innerHTML = `<div class="fb bad">${esc(e.message)}. 브라우저 주소창 옆 🔒 → 마이크 허용을 확인하세요.</div>`; btn.disabled = false; return; }
   for (let s = 5; s > 0; s--) { btn.textContent = `🔴 말해 보세요… ${s}`; await new Promise(r => setTimeout(r, 1000)); }
   const r = await a.stop();
+  const mode = S.settings.mode;
   let h = '';
-  if (S.settings.mode !== 'stt') h += r.blob ? `<div class="fb good">✅ 녹음 잘 돼요</div><audio controls src="${blobUrl(r.blob)}"></audio>` : `<div class="fb bad">❌ 녹음 실패: ${esc(r.recErr || '소리가 녹음되지 않았어요')}</div>`;
-  if (S.settings.mode !== 'rec') h += r.transcript ? `<div class="fb good">✅ 받아쓰기: <span class="en">"${esc(r.transcript)}"</span></div>` : `<div class="fb bad">❌ 받아쓰기 결과 없음${r.sttErr ? ' — ' + esc(r.sttErr) : ''}</div>`;
-  if (S.settings.mode === 'both' && r.blob && !r.transcript) h += `<div class="fb tip">이 휴대폰은 녹음과 받아쓰기를 동시에 못 하는 것 같아요. ⚙️ 설정 → 답변 방식에서 <b>받아쓰기만</b> 또는 <b>녹음만</b>을 골라 보세요.</div>`;
+  if (mode !== 'stt') h += r.blob ? `<div class="fb good">✅ 녹음 잘 돼요</div><audio controls src="${blobUrl(r.blob)}"></audio>` : `<div class="fb bad">❌ 녹음 실패: ${esc(r.recErr || '소리가 녹음되지 않았어요')}</div>`;
+  if (mode === 'both' || mode === 'stt') h += r.transcript ? `<div class="fb good">✅ 받아쓰기: <span class="en">"${esc(r.transcript)}"</span></div>` : `<div class="fb bad">❌ 받아쓰기 결과 없음${r.sttErr ? ' — ' + esc(r.sttErr) : ''}</div>`;
+  if (mode === 'both' && r.blob && !r.transcript) h += `<div class="fb tip">이 휴대폰은 녹음과 받아쓰기를 동시에 못 하는 것 같아요. <b>녹음 + AI 받아쓰기</b>로 바꾸면 녹음이 끝난 뒤 AI가 글자로 바꿔 줘요.<br><button class="btn sm pri" style="margin-top:8px" data-act="useAI">녹음 + AI 받아쓰기로 바꾸기</button></div>`;
+  if (mode === 'ai' && r.blob) {
+    btn.textContent = '🤖 AI가 글자로 바꾸는 중…';
+    box.innerHTML = h + `<div class="fb tip ai-status">🤖 ${esc(AI.status())}</div>`;
+    try { const t = await AI.transcribe(r.blob); h += t ? `<div class="fb good">✅ AI 받아쓰기: <span class="en">"${esc(t)}"</span></div>` : `<div class="fb bad">❌ AI가 알아들은 말이 없어요. 조금 더 크게 말해 보세요.</div>`; }
+    catch (e) { h += `<div class="fb bad">❌ AI 받아쓰기 실패 — ${esc(e.message)}</div>`; }
+  }
   box.innerHTML = h; btn.disabled = false; btn.textContent = '다시 시험하기';
 }
 
@@ -569,11 +666,13 @@ function buildExam() {
   return steps;
 }
 function startExam() {
+  if (S.settings.mode === 'ai') AI.preload().catch(() => {});
   run = { kind: 'exam', steps: buildExam(), i: 0, items: [], showText: S.settings.showText };
   openStage(); keepAwake(true); stepStart();
 }
 function startPractice(qid, text, isFollow) {
   const q = QMAP[qid];
+  if (S.settings.mode === 'ai') AI.preload().catch(() => {});
   run = { kind: 'practice', steps: [{ qid, text: text || q.q, lv: q.lv, isFollow: !!isFollow }], i: 0, items: [], showText: true };
   openStage(); keepAwake(true); stepStart(true);
 }
@@ -599,7 +698,7 @@ function stageQ() {
     ? `<div class="timer" id="timer">0:00</div>
        <div class="tbar"><i id="tbar"></i></div>
        <div class="row between tiny faint"><span>목표 ${fmtLong(LV[st.lv].time)}</span><span id="tnote"></span></div>
-       ${S.settings.mode !== 'rec' ? `<div class="live en" id="live" style="margin-top:10px"><span class="faint">말하면 여기에 글자로 나와요…</span></div>` : '<p class="small muted" style="text-align:center">녹음 중이에요. 편하게 말하세요.</p>'}
+       ${S.settings.mode === 'both' || S.settings.mode === 'stt' ? `<div class="live en" id="live" style="margin-top:10px"><span class="faint">말하면 여기에 글자로 나와요…</span></div>` : `<p class="small muted" style="text-align:center">녹음 중이에요. 편하게 말하세요.${S.settings.mode === 'ai' ? '<br>답변이 끝나면 AI가 글자로 바꿔 줘요.' : ''}</p>`}
        <button class="mic rec" data-act="stopAns" aria-label="답변 끝">■</button>
        <button class="btn pri block" data-act="stopAns">✓ 답변 끝${exam && run.i < n - 1 ? ' · 다음 질문' : ''}</button>`
     : `<button class="mic" data-act="startAns" ${talking ? 'disabled style="opacity:.5"' : ''} aria-label="답변 시작">🎙️</button>
@@ -646,6 +745,7 @@ async function stopAns() {
   const item = { qid: st.qid, text: st.text, lv: st.lv, isFollow: !!st.isFollow, sec: r.sec, transcript: r.transcript, audio: r.blob, replays: run.replays,
     stats: r.transcript ? analyze(r.transcript, r.sec, st.isFollow ? null : QMAP[st.qid]) : null };
   run.items.push(item);
+  if (S.settings.mode === 'ai' && item.audio) aiTranscribe(item);
   nextStep();
 }
 function skipQ() {
@@ -709,11 +809,13 @@ function highlight(text, keysUsed) {
 function itemCard(it, idx, isEx) {
   const q = QMAP[it.qid] || {};
   const fb = feedback(it);
-  return `<div class="card">
+  return `<div class="card" id="item-${idx}">
     <div class="row between small">${isEx ? `<b>${idx + 1}. ${it.isFollow ? '추가 질문' : CATS[q.cat] || ''}</b>` : `<b>${it.isFollow ? '추가 질문' : CATS[q.cat] || ''}</b>`}${lvBadge(it.lv)}</div>
     <div class="en" style="font-weight:600;margin:6px 0 2px">${esc(it.text)} <button class="mini" style="display:inline-grid;width:28px;height:28px;font-size:13px;vertical-align:middle" data-act="say" data-text="${esc(it.text)}">🔊</button></div>
     ${!it.isFollow && q.ko ? `<div class="small muted">${esc(q.ko)}</div>` : ''}
     ${it.audio ? `<audio controls preload="metadata" src="${blobUrl(it.audio)}"></audio>` : ''}
+    ${it.aiBusy ? `<div class="fb tip ai-status">🤖 ${esc(AI.status())}</div>`
+      : it.audio && !it.transcript ? `${it.aiErr ? `<div class="fb bad">AI 받아쓰기 실패 — ${esc(it.aiErr)}</div>` : ''}<button class="btn sm" style="margin:4px 0" data-act="aiItem" data-idx="${idx}">🤖 AI로 내 답변 글자로 바꾸기</button>` : ''}
     ${it.transcript ? `<div class="small muted" style="margin-top:8px">내가 한 말 (받아쓰기 · <span class="hl">연결어</span> 표시)</div><div class="live en" style="max-height:none;color:var(--ink)">${highlight(it.transcript)}</div>` : ''}
     ${it.stats ? `<div class="row wrap-r" style="margin-top:8px"><span class="tag">⏱ ${fmtLong(it.sec)}</span><span class="tag">📝 ${it.stats.wc}단어</span>${it.stats.wpm ? `<span class="tag">🏃 분당 ${it.stats.wpm}</span>` : ''}${it.replays ? `<span class="tag">🔁 다시 듣기 ${it.replays}번</span>` : ''}</div>` : ''}
     ${fb.map(f => `<div class="fb ${f.t}">${f.m}</div>`).join('')}
@@ -732,8 +834,17 @@ function openSettings() {
   const vs = TTS.voices();
   $('#sheetPanel').innerHTML = `<div class="row between"><h2 style="margin:0">⚙️ 설정</h2><button class="icon-btn" data-act="closeSheet">✕</button></div>
   <div class="field"><label>질문 읽어 주는 속도</label><div class="seg">${[[0.8, '천천히'], [0.95, '보통'], [1.1, '빠르게']].map(([v, n]) => `<button class="${S.settings.rate === v ? 'on' : ''}" data-act="setRate" data-v="${v}">${n}</button>`).join('')}</div></div>
-  <div class="field"><label>답변 방식</label><div class="seg">${[['both', '녹음+받아쓰기'], ['rec', '녹음만'], ['stt', '받아쓰기만']].map(([v, n]) => `<button class="${S.settings.mode === v ? 'on' : ''}" data-act="setMode" data-v="${v}">${n}</button>`).join('')}</div>
-    <p class="tiny faint" style="margin:6px 0 0">받아쓰기는 크롬에서 잘 되고 인터넷이 필요해요. 둘이 동시에 안 되는 휴대폰도 있으니 모의시험 탭의 마이크 시험으로 확인해 보세요.</p></div>
+  <div class="field"><label>답변 방식</label><div class="seg grid">${[['ai', '녹음 + AI 받아쓰기'], ['both', '녹음 + 받아쓰기'], ['rec', '녹음만'], ['stt', '받아쓰기만']].map(([v, n]) => `<button class="${S.settings.mode === v ? 'on' : ''}" data-act="setMode" data-v="${v}">${n}</button>`).join('')}</div>
+    <p class="tiny faint" style="margin:6px 0 0">${{
+      ai: '말하는 동안 녹음하고, 답변이 끝나면 휴대폰 안의 AI가 녹음을 글자로 바꿔요. 녹음과 받아쓰기를 동시에 못 하는 휴대폰에 맞아요. 처음 한 번 AI 모델을 내려받아요(와이파이 권장).',
+      both: '녹음하면서 동시에 글자로 받아써요. 크롬에서 되고 인터넷이 필요해요. 둘이 동시에 안 되는 휴대폰도 있으니 마이크 시험으로 확인해 보세요.',
+      rec: '내 목소리만 녹음해요. 글자 기반 피드백(속도·연결어)은 나오지 않아요.',
+      stt: '글자로만 받아써요. 내 목소리를 다시 들을 수는 없어요.'
+    }[S.settings.mode]}</p></div>
+  ${S.settings.mode === 'ai' ? `<div class="field"><label>AI 받아쓰기 정확도</label><div class="seg">${Object.entries(AI_MODELS).map(([k, m]) => `<button class="${S.settings.aiModel === k ? 'on' : ''}" data-act="setAiModel" data-v="${k}">${m.name} · ${m.size}</button>`).join('')}</div>
+    <p class="tiny faint" style="margin:6px 0 0">"정확하게"는 발음을 더 잘 알아듣지만 글자로 바꾸는 데 시간이 더 걸려요.</p>
+    <div class="fb tip ai-status" style="margin-top:8px">🤖 ${esc(AI.status())}</div>
+    <button class="btn sm" data-act="aiPreload">⬇️ 지금 미리 내려받기</button></div>` : ''}
   <div class="field switch"><div><b>모의시험에서 질문 글자 보이기</b><div class="tiny faint">실제 시험은 듣기만 해요. 처음엔 켜 두어도 좋아요.</div></div><input type="checkbox" data-in="showText" ${S.settings.showText ? 'checked' : ''}></div>
   ${vs.length ? `<div class="field"><label>시험관 목소리</label><select data-in="voice"><option value="">자동 선택</option>${vs.map(v => `<option ${v.name === S.settings.voice ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
     <button class="btn sm" style="margin-top:8px" data-act="say" data-text="Hello. Could you please introduce yourself?">🔊 들어 보기</button></div>` : `<p class="small muted">이 브라우저에서는 영어 음성을 찾지 못했어요.</p>`}
@@ -802,7 +913,17 @@ const ACT = {
     el.classList.toggle('on', !!S.vocab.star[id]); el.textContent = S.vocab.star[id] ? '⭐' : '☆';
   },
   setRate: el => { S.settings.rate = +el.dataset.v; saveSettings(); openSettings(); },
-  setMode: el => { S.settings.mode = el.dataset.v; saveSettings(); openSettings(); }
+  setMode: el => { S.settings.mode = el.dataset.v; saveSettings(); openSettings(); },
+  setAiModel: el => { S.settings.aiModel = el.dataset.v; AI.state = 'idle'; AI.files = {}; AI.pct = 0; saveSettings(); openSettings(); },
+  aiPreload: () => {
+    AI.preload().then(() => toast('AI 준비 완료! 이제 답변을 글자로 바꿀 수 있어요')).catch(e => toast('내려받기 실패 — ' + e.message));
+    AI.emit();
+  },
+  useAI: () => {
+    S.settings.mode = 'ai'; saveSettings();
+    toast('녹음 + AI 받아쓰기로 바꿨어요. 마이크 시험을 다시 해 보세요');
+  },
+  aiItem: el => { if (viewing) aiTranscribe(viewing.items[+el.dataset.idx]); }
 };
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
@@ -834,6 +955,7 @@ window.addEventListener('beforeunload', e => { if (run && run.ans) { e.preventDe
   try { const st = await DB.get('kv', 'settings'); if (st) Object.assign(S.settings, st); } catch (e) {}
   try { const v = await DB.get('kv', 'vocab'); if (v) Object.assign(S.vocab, v); } catch (e) {}
   try { S.sessions = (await DB.getAll('sessions')) || []; } catch (e) { S.sessions = []; }
+  S.sessions.forEach(s => s.items.forEach(i => { i.aiBusy = false; }));
   setTab('home');
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});

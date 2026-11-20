@@ -29,6 +29,9 @@
     `data/vocab.js`: 회화 단어장. `sw.js`: 오프라인용 — 앱 파일을 더하면 `FILES` 에도 넣고 `CACHE` 버전을 올린다.
 - 기록(녹음·받아쓰기·자기 채점)은 기기 IndexedDB(`spa-practice`)에만 저장한다. Firebase 는 쓰지 않는다.
 - 질문 읽기는 브라우저 `speechSynthesis`, 받아쓰기는 `SpeechRecognition`(크롬), 녹음은 `MediaRecorder`.
-  일부 안드로이드는 녹음과 받아쓰기를 동시에 못 해서 설정에 "녹음만 / 받아쓰기만"이 있다.
+  사용자 휴대폰은 녹음과 받아쓰기를 **동시에 못 한다**. 그래서 "녹음 + AI 받아쓰기"(`mode: 'ai'`)가 있다:
+  녹음이 끝나면 `asr-worker.js`(Web Worker)가 transformers.js(jsdelivr, `dist/transformers.min.js` — `.web` 판은 의존성 때문에 URL로 못 읽음)와
+  Whisper 모델(`Xenova/whisper-tiny.en` / `base.en`, Hugging Face 에서 처음 한 번 내려받아 브라우저 Cache 에 저장)로 글자로 바꾼다.
+  이 세션 환경에서는 huggingface.co 가 막혀 실제 모델 추론은 시험하지 못했다(가짜 작업자로 화면 흐름만 시험).
 - **APK 는 사용자가 "최종 버전"이라고 할 때까지 만들지 않는다.** 만들게 되면 다른 앱들처럼 `android/` + Actions 로 하고 버전은 1.0.N 부터.
 - SPA 시험 형식·점수 기준은 응시 후기 기반이다. 앱 안에서 공식 기준처럼 단정하지 않는다.
