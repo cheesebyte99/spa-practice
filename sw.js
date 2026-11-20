@@ -1,6 +1,6 @@
 /* 오프라인에서도 열리도록 앱 파일을 저장해 둔다.
  * 인터넷이 되면 늘 새 파일을 먼저 받아 오고(업데이트 바로 반영), 안 되면 저장해 둔 파일을 쓴다. */
-const CACHE = 'spa-practice-v1';
+const CACHE = 'spa-practice-v2';
 const FILES = ['./', 'index.html', 'data/questions.js', 'data/vocab.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

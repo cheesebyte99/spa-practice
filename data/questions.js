@@ -453,5 +453,232 @@ window.SPA_QUESTIONS = [
     tip: '과제 하나를 골라 깊게: 배경 → 왜 어려운가 → 대응 2가지 → 내 역할. 너무 많이 나열하지 마세요.',
     model: "I think the biggest challenge is the transition to software-defined vehicles. In the past, car makers competed on engines and design, but now the key is software, like driver assistance and connected services. The problem is that traditional car companies don't have enough software engineers, and tech companies like Tesla are moving very fast. To respond, companies need to hire and train software talent aggressively and change their organizational culture to be more flexible. Personally, I'm trying to understand software processes better so I can work effectively with those teams.",
     keys: [['the transition to ~', '~으로의 전환'], ['compete on ~', '~으로 경쟁하다'], ['aggressively', '적극적으로'], ['so I can ~', '~할 수 있도록']]
+  },
+
+  /* ═════════ 추가 질문 묶음 ═════════ */
+  {
+    id: 'i5', cat: 'intro', lv: 1,
+    q: 'Why are you taking this test today?',
+    ko: '오늘 이 시험을 보는 이유는 무엇인가요?',
+    follow: ['How did you prepare for this test?', 'How do you feel right now?'],
+    tip: '솔직한 이유(진급) + 영어가 필요한 업무 상황 한 가지. 짧고 자신 있게!',
+    model: "I'm taking this test because I'm up for promotion this year, and an English speaking score is one of the requirements. But it's not just for the promotion. These days, I have more chances to work with overseas plants and partners, so I really need to communicate in English. I've been practicing speaking every day for the past few months, so I hope it shows today.",
+    keys: [['be up for promotion', '진급 대상이다'], ['one of the requirements', '요건 중 하나'], ['It\'s not just for ~', '단지 ~ 때문만은 아니에요'], ['I hope it shows', '그 노력이 드러나면 좋겠어요']]
+  },
+  {
+    id: 'd7', cat: 'daily', lv: 1,
+    q: 'What is your favorite season? Why?',
+    ko: '가장 좋아하는 계절은? 이유는?',
+    follow: ['What do you usually do in that season?', 'Which season do you like the least?'],
+    tip: '계절 하나 → 이유 2가지(날씨·활동) → 그 계절에 하는 일. 형용사(cool, crisp, colorful)를 써 보세요.',
+    model: "My favorite season is autumn. First, the weather is perfect. It's not too hot or too cold, and the sky is clear and blue. Second, it's a great season for outdoor activities. The mountains turn red and yellow, so I often go hiking with my family. The only problem is that it's too short in Korea. It feels like winter comes right after summer these days.",
+    keys: [['not too hot or too cold', '너무 덥지도 춥지도 않은'], ['turn red and yellow', '붉고 노랗게 물들다'], ['The only problem is that ~', '유일한 문제는 ~'], ['It feels like ~', '~인 것 같은 느낌이에요']]
+  },
+  {
+    id: 'd8', cat: 'daily', lv: 2,
+    q: 'Tell me about the neighborhood you live in.',
+    ko: '살고 있는 동네에 대해 이야기해 주세요.',
+    follow: ['What do you like most about living there?', 'Would you like to move somewhere else in the future?'],
+    tip: '위치·주거 형태 → 주변 시설 → 좋은 점·아쉬운 점. "There is / There are"를 활용하세요.',
+    model: "I live in an apartment complex in Dongtan, which is a new town near Suwon. It's a good place for families because there are lots of parks, schools, and hospitals nearby. There's also a big shopping mall within walking distance. What I like most is the walking trail along the lake, where I often take a walk after dinner. The downside is the traffic during rush hour, because a lot of people commute to Seoul.",
+    keys: [['apartment complex', '아파트 단지'], ['within walking distance', '걸어갈 수 있는 거리에'], ['take a walk', '산책하다'], ['during rush hour', '출퇴근 시간에']]
+  },
+  {
+    id: 'd9', cat: 'daily', lv: 2,
+    q: 'How do you study English?',
+    ko: '영어 공부는 어떻게 하세요?',
+    follow: ['What is the hardest part of learning English for you?', 'What advice would you give to someone starting to learn English?'],
+    tip: '방법 2~3가지(앱·드라마·회화 수업) → 꾸준히 하는 요령 → 어려운 점. 지금 쓰는 이 앱 이야기도 좋아요!',
+    model: "I study English in a few different ways. On my way to work, I listen to English podcasts about business and technology. Twice a week, I take an online conversation class with a native speaker. I also use an app to practice answering interview questions and record my voice. Listening to my own recordings was embarrassing at first, but it really helps me find my mistakes. The hardest part is finding time, so I try to study a little every day instead of a lot at once.",
+    keys: [['On my way to work', '출근길에'], ['take an online conversation class', '온라인 회화 수업을 듣다'], ['embarrassing at first', '처음엔 창피한'], ['a little every day instead of a lot at once', '한 번에 많이 말고 매일 조금씩']]
+  },
+  {
+    id: 'd10', cat: 'daily', lv: 2,
+    q: 'How do you usually spend long holidays like Chuseok or Seollal?',
+    ko: '추석·설 같은 긴 연휴는 주로 어떻게 보내세요?',
+    follow: ['How have holidays changed compared to when you were young?', 'What is the best part of the holidays?'],
+    tip: '명절 간단 소개 → 우리 가족이 하는 일(현재형) → 느낌. 외국인에게 설명하듯 말하세요.',
+    model: "Chuseok is one of the biggest holidays in Korea, kind of like Thanksgiving. Usually my family drives to my parents' house in Daegu, although the traffic is terrible. We prepare food together, visit my grandparents' graves, and spend time catching up. My kids love it because their grandparents spoil them. These days, though, more people travel abroad during the holidays instead, and honestly, I'm tempted to try that someday.",
+    keys: [['kind of like ~', '~ 같은 거예요'], ['although the traffic is terrible', '차가 엄청 막히긴 하지만'], ['spoil', '(아이를) 오냐오냐하다'], ['I\'m tempted to ~', '~하고 싶은 마음이 들어요']]
+  },
+  {
+    id: 'w9', cat: 'work', lv: 3,
+    q: 'How do you prioritize when you have many tasks at the same time?',
+    ko: '여러 일이 한꺼번에 몰리면 우선순위를 어떻게 정하나요?',
+    follow: ['What do you do when two managers ask for something urgent at the same time?', 'Do you use any tools to manage your tasks?'],
+    tip: '기준(긴급성·중요도) → 구체적 방법 → 실제 예시. "urgent vs important" 구분이 핵심이에요.',
+    model: "When I have many tasks, I first list everything and divide them by urgency and importance. Tasks that are both urgent and important come first, and things that are not urgent can be scheduled for later. If something can be done in five minutes, I just do it right away. For example, last month I had a quality report, a supplier meeting, and a training session in the same week. I asked my manager which one had the highest priority, and that helped me plan my time clearly.",
+    keys: [['divide them by urgency and importance', '긴급도와 중요도로 나누다'], ['come first', '먼저 처리되다'], ['right away', '바로'], ['the highest priority', '최우선 순위']]
+  },
+  {
+    id: 'w10', cat: 'work', lv: 3,
+    q: 'What is the culture like at your company?',
+    ko: '회사 문화는 어떤가요?',
+    follow: ['How has it changed since you joined?', 'What would you like to improve about it?'],
+    tip: '전체 분위기 → 예전과 달라진 점(예: 호칭·복장·유연근무) → 좋은 점/아쉬운 점.',
+    model: "Overall, my company has a fairly traditional culture, but it's been changing a lot recently. When I first joined, there was a strict hierarchy, and we had to wear suits every day. Now, we have a casual dress code, flexible working hours, and we call each other by job titles that are much simpler. Younger employees speak up more in meetings, which I think is a good change. However, decision-making is still a bit slow, so there's room for improvement.",
+    keys: [['fairly traditional', '꽤 보수적인'], ['a strict hierarchy', '엄격한 위계질서'], ['speak up', '의견을 말하다'], ['there\'s room for improvement', '개선의 여지가 있다']]
+  },
+  {
+    id: 'w11', cat: 'work', lv: 3,
+    q: 'How does your company train new employees?',
+    ko: '회사는 신입 사원을 어떻게 교육하나요?',
+    follow: ['What was your own training like?', 'What would make the training better?'],
+    tip: '단계별 설명(입문 교육 → 부서 교육 → 멘토링) → 효과 → 개선점. 수동태(are trained, is assigned)를 써 보세요.',
+    model: "New employees first go through a four-week orientation program at our training center, where they learn about the company's history, products, and basic business skills. After that, they are assigned to their departments. Each new person gets a mentor, usually a senior colleague, who helps them for about six months. I've been a mentor twice, and I think the mentoring part is the most effective, because it's personal and practical.",
+    keys: [['go through an orientation program', '입문 교육을 거치다'], ['be assigned to ~', '~에 배치되다'], ['a senior colleague', '선배 동료'], ['personal and practical', '개인적이고 실용적인']]
+  },
+  {
+    id: 'w12', cat: 'work', lv: 3,
+    q: 'Describe a meeting you attended recently.',
+    ko: '최근에 참석한 회의를 묘사해 주세요.',
+    follow: ['Was the meeting productive? Why or why not?', 'How can meetings be more efficient?'],
+    tip: '언제·누가·주제 → 오간 이야기 → 결론·내 역할. 과거형과 보고 표현(we discussed, we agreed)을 쓰세요.',
+    model: "Last Thursday, I attended a meeting with the design and production teams about a new interior part. About ten people joined, some in person and some online. We discussed a problem where the part didn't fit well during the trial production. The design team wanted to change the shape, but production said it would take too long. After an hour of discussion, we agreed to make a small adjustment to the mold instead. My role was to check the cost and schedule impact and report back by Monday.",
+    keys: [['some in person and some online', '일부는 대면, 일부는 온라인으로'], ['We discussed ~', '~을 논의했어요'], ['We agreed to ~', '~하기로 합의했어요'], ['report back', '결과를 보고하다']]
+  },
+  {
+    id: 's5', cat: 'describe', lv: 3,
+    q: 'Describe something you use every day and explain why it is important to you.',
+    ko: '매일 쓰는 물건 하나를 묘사하고 왜 중요한지 설명해 주세요.',
+    follow: ['How would your life be different without it?', 'What will replace it in the future?'],
+    tip: '물건 → 생김새·기능 묘사 → 쓰는 상황 → 없으면 어떨지. 묘사력(shape, size, features)을 보여 주세요.',
+    model: "Something I use every day is my smartwatch. It's small and black, with a round screen and a rubber strap. It shows the time, of course, but it also tracks my steps, heart rate, and sleep. During the day, it vibrates when I get important messages, so I don't have to keep checking my phone in meetings. It's important to me because it helps me stay healthy and focused. Honestly, when I forget it at home, I feel like something is missing.",
+    keys: [['It\'s small and black, with ~', '작고 검은색이고 ~이 있어요'], ['track', '기록·추적하다'], ['so I don\'t have to ~', '그래서 ~하지 않아도 돼요'], ['I feel like something is missing', '뭔가 빠진 느낌이에요']]
+  },
+  {
+    id: 's6', cat: 'describe', lv: 3,
+    q: 'Explain a Korean tradition or custom to someone from another country.',
+    ko: '외국인에게 한국의 전통이나 풍습 하나를 설명해 주세요.',
+    follow: ['Is this tradition still common among young people?', 'Is there a similar custom in other countries?'],
+    tip: '무엇인지 → 언제·어떻게 하는지 → 의미 → 요즘 변화. 한국어 단어는 꼭 영어로 풀어서!',
+    model: "One interesting Korean custom is that people often pour drinks for each other instead of for themselves. When you drink with someone older or more senior, you hold the bottle with both hands, and when you receive a drink, you also hold your glass with both hands. Younger people sometimes turn their head slightly away when they drink. It's a way of showing respect. These days, it's less strict among young people, but in business dinners, it's still quite common.",
+    keys: [['pour drinks for each other', '서로 술을 따라 주다'], ['with both hands', '두 손으로'], ['a way of showing respect', '존중을 표현하는 방법'], ['less strict', '덜 엄격한']]
+  },
+  {
+    id: 'e6', cat: 'exp', lv: 3,
+    q: 'Tell me about your first day at your company.',
+    ko: '입사 첫날에 대해 이야기해 주세요.',
+    follow: ['How has the company changed since then?', 'What advice would you give to new employees?'],
+    tip: '그날의 장면 묘사 → 느낌(nervous, excited) → 기억나는 사람·일 → 지금 돌아보면. 과거형 연습에 좋아요.',
+    model: "I still remember my first day very clearly. I wore a brand-new suit and arrived an hour early because I was so nervous. My team leader introduced me to everyone, but there were so many names that I couldn't remember any of them. At lunch, a senior colleague took me to a famous noodle place near the office and told me not to worry too much. That small kindness meant a lot to me. Looking back, I was so serious and stiff. Now I try to do the same for new people.",
+    keys: [['I still remember ~ very clearly', '~을 아직 생생히 기억해요'], ['brand-new', '새로 산'], ['meant a lot to me', '저에게 큰 의미였어요'], ['Looking back,', '돌이켜 보면']]
+  },
+  {
+    id: 'e7', cat: 'exp', lv: 3,
+    q: 'Tell me about a time you had to meet a very tight deadline.',
+    ko: '아주 빠듯한 마감을 맞춰야 했던 경험을 이야기해 주세요.',
+    follow: ['What would you do differently next time?', 'Do you work better under pressure?'],
+    tip: 'STAR 구조. 마감이 왜 급했나 → 내가 한 조치(분담·우선순위) → 결과 → 교훈.',
+    model: "Last year, a major client suddenly moved their audit forward by two weeks, so we had only five days to prepare all the quality documents. First, I split the work among three team members based on their strengths. I focused on the most critical data myself. We had a quick check-in every morning and evening to catch problems early. We worked late for several days, but we submitted everything on time, and the audit went smoothly. I learned that clear roles matter more than long hours.",
+    keys: [['move ~ forward', '(일정을) 앞당기다'], ['split the work among ~', '~에게 일을 나누다'], ['catch problems early', '문제를 일찍 발견하다'], ['clear roles matter more than long hours', '오래 일하는 것보다 명확한 역할이 중요하다']]
+  },
+  {
+    id: 'e8', cat: 'exp', lv: 3,
+    q: 'Tell me about a time you helped a colleague.',
+    ko: '동료를 도와준 경험을 이야기해 주세요.',
+    follow: ['Has a colleague ever helped you in a similar way?', 'Why is teamwork important in your job?'],
+    tip: '동료의 상황 → 내가 한 도움 → 결과 → 느낀 점. 자랑보다 팀워크를 강조하세요.',
+    model: "A couple of years ago, a junior colleague on my team was struggling with his first big presentation to senior management. He was very nervous and his slides were too detailed. I offered to help, so we stayed after work for two evenings. I showed him how to focus on three key messages and we practiced answering tough questions. The presentation went really well, and he even got compliments from the director. It felt great, maybe even better than when I succeed myself.",
+    keys: [['be struggling with ~', '~으로 애를 먹고 있다'], ['I offered to help', '돕겠다고 나섰어요'], ['focus on three key messages', '핵심 메시지 세 개에 집중하다'], ['get compliments from ~', '~에게 칭찬을 받다']]
+  },
+  {
+    id: 'o8', cat: 'opinion', lv: 4,
+    q: 'Is it better to stay at one company for a long time or to change jobs several times?',
+    ko: '한 회사에 오래 다니는 것과 여러 번 이직하는 것 중 어느 쪽이 나을까요?',
+    follow: ['Has your view changed as you got older?', 'Why do young people change jobs more often these days?'],
+    tip: '양쪽 장점 비교 → 내 입장 → 조건(직무·나이에 따라). "On the other hand"로 대조해 보세요.',
+    model: "Both have their advantages. Staying at one company lets you build deep expertise and strong relationships, and you understand how everything works. Changing jobs, on the other hand, can help you gain a wider range of experience and often a higher salary. Personally, I prefer staying longer, as long as I keep growing. I've been at my company for twelve years, but I've moved between three different departments, so it feels like I've had several jobs in one company. I think what really matters is whether you keep learning.",
+    keys: [['Both have their advantages', '둘 다 장점이 있어요'], ['a wider range of experience', '더 폭넓은 경험'], ['as long as ~', '~하는 한'], ['what really matters is ~', '정말 중요한 건 ~']]
+  },
+  {
+    id: 'o9', cat: 'opinion', lv: 4,
+    q: 'Should promotions be based on performance or on years of experience?',
+    ko: '진급은 성과 기준이어야 할까요, 연차 기준이어야 할까요?',
+    follow: ['How can a company measure performance fairly?', 'What are the risks of a purely performance-based system?'],
+    tip: '진급 시험에서 나올 법한 주제! 입장 → 이유 → 반대쪽 우려 인정 → 균형 잡힌 제안.',
+    model: "I believe promotions should be based mainly on performance. If people get promoted just because they've been around longer, talented employees lose motivation and may leave the company. On the other hand, performance can be hard to measure fairly, especially in support roles. Experience also brings valuable knowledge that doesn't always show up in numbers. So ideally, I think performance should be the main factor, but experience and teamwork should also be considered, with clear and transparent criteria.",
+    keys: [['be based mainly on ~', '주로 ~에 근거하다'], ['lose motivation', '의욕을 잃다'], ['show up in numbers', '숫자로 드러나다'], ['clear and transparent criteria', '명확하고 투명한 기준']]
+  },
+  {
+    id: 'o10', cat: 'opinion', lv: 4,
+    q: 'Do you think social media has more positive or negative effects on people?',
+    ko: '소셜 미디어가 사람들에게 긍정적 영향이 더 클까요, 부정적 영향이 더 클까요?',
+    follow: ['How much time do you spend on social media?', 'Should children\'s use of social media be limited?'],
+    tip: '장점(소통·정보) vs 단점(비교·중독·가짜 뉴스) → 내 결론 → 어떻게 써야 하는지.',
+    model: "I think social media itself is neutral, but it has more negative effects when people use it without control. On the positive side, it helps us stay in touch with friends and get information quickly. Companies also use it to communicate with customers. However, many people compare their lives with others' perfect photos and feel unhappy. It can also spread fake news very fast. So I think the key is to use it moderately. Personally, I turned off notifications, and I check it only once or twice a day.",
+    keys: [['On the positive side, ~', '긍정적인 면에서는 ~'], ['stay in touch with ~', '~와 연락을 유지하다'], ['spread fake news', '가짜 뉴스를 퍼뜨리다'], ['moderately', '적당히']]
+  },
+  {
+    id: 'o11', cat: 'opinion', lv: 4,
+    q: 'Should companies hire people based on skills rather than university degrees?',
+    ko: '기업은 학위보다 실력을 보고 채용해야 할까요?',
+    follow: ['How can companies test skills during hiring?', 'Is a university degree still worth it?'],
+    tip: '입장 → 근거(기술 변화·다양성) → 학위의 가치도 인정 → 결론. 진급 시험 의견 질문의 전형이에요.',
+    model: "Yes, I think skills should matter more than degrees. Technology changes so fast that what people learned at university can become outdated in a few years. Many great software engineers, for example, taught themselves online. Hiring for skills also gives a chance to talented people who couldn't go to a good university. That said, a degree still shows that someone can work hard and learn systematically. So the best approach would be to look at both, but give more weight to practical tests and real experience.",
+    keys: [['become outdated', '구식이 되다'], ['teach oneself', '독학하다'], ['learn systematically', '체계적으로 배우다'], ['give more weight to ~', '~에 더 비중을 두다']]
+  },
+  {
+    id: 'r7', cat: 'role', lv: 4,
+    q: 'Role-play: You are going to be late for an important meeting with an overseas partner. Call me and explain.',
+    ko: '롤플레이: 해외 파트너와의 중요한 회의에 늦게 됐어요. 저에게 전화해서 설명하세요.',
+    follow: ['Can we just reschedule the meeting to tomorrow instead?', 'How long exactly will you be?'],
+    tip: '인사·이름 → 사과 + 이유(짧게) → 도착 예상 시간 → 대안 제시 → 다시 사과. 전화 영어 표현 연습!',
+    model: "Hello, Mr. Brown? This is Minsu Kim from Hyundai. I'm really sorry, but I'm afraid I'm going to be about twenty minutes late for our meeting. There was an accident on the highway, and traffic is completely stopped. I should arrive by two-twenty. If that's not convenient for you, we could start the meeting online now, and I can join from my phone. Or, if you prefer, we could move it to a later time today. Again, I apologize for the inconvenience.",
+    keys: [['This is ~ from ~', '저는 ~의 ~입니다(전화)'], ['I\'m afraid I\'m going to be ~ late', '죄송하지만 ~ 늦을 것 같아요'], ['If that\'s not convenient for you, ~', '불편하시면 ~'], ['I apologize for the inconvenience', '불편을 드려 죄송합니다']]
+  },
+  {
+    id: 'r8', cat: 'role', lv: 4,
+    q: 'Role-play: I\'m your coworker. Ask me to cover your work while you\'re on vacation next week.',
+    ko: '롤플레이: 저는 동료예요. 다음 주 휴가 동안 업무를 대신 봐 달라고 부탁하세요.',
+    follow: ['I\'m really busy next week too. Can you ask someone else?', 'What should I do if there\'s an emergency?'],
+    tip: '정중한 부탁(I was wondering if ~) → 맡길 일 구체적으로 → 준비해 둔 것 → 보답 약속.',
+    model: "Hey, Jiwon, do you have a minute? I'm taking a vacation next week, from Monday to Friday, and I was wondering if you could cover a few things for me. There are just two main tasks: checking the daily delivery report and answering urgent emails from our supplier in Vietnam. I've written a simple guide with all the contacts and files, so it shouldn't take more than thirty minutes a day. If anything serious happens, you can call me anytime. I'll definitely return the favor when you go on vacation.",
+    keys: [['Do you have a minute?', '잠깐 시간 있어요?'], ['I was wondering if you could ~', '혹시 ~해 줄 수 있을까 해서요'], ['it shouldn\'t take more than ~', '~ 이상은 안 걸릴 거예요'], ['return the favor', '신세를 갚다']]
+  },
+  {
+    id: 'r9', cat: 'role', lv: 5,
+    q: 'Imagine your team\'s project failed. How would you report it to senior management?',
+    ko: '팀 프로젝트가 실패했다고 가정해 보세요. 경영진에게 어떻게 보고하겠어요?',
+    follow: ['What if they blame your team members?', 'How would you keep your team motivated after the failure?'],
+    tip: '가정법 유지(I would ~). 사실 → 원인 분석 → 책임 인정 → 재발 방지·다음 계획. 변명처럼 들리지 않게!',
+    model: "I would report it as soon as possible and be completely honest about the result. First, I would explain what happened with clear data, without hiding anything. Then I would present the main causes. For example, we may have underestimated the technical difficulty. As the leader, I would take responsibility rather than blame individual members. Most importantly, I would focus on what we learned and propose a concrete plan to prevent the same problems, so that the failure becomes a valuable lesson for the company.",
+    keys: [['be completely honest about ~', '~에 대해 완전히 솔직하다'], ['underestimate', '과소평가하다'], ['take responsibility rather than blame ~', '~을 탓하기보다 책임을 지다'], ['a concrete plan', '구체적인 계획']]
+  },
+  {
+    id: 'x7', cat: 'issue', lv: 5,
+    q: 'Should governments regulate artificial intelligence? Why or why not?',
+    ko: '정부가 인공지능을 규제해야 할까요?',
+    follow: ['Who should be responsible if AI makes a harmful decision?', 'How is AI used in your company?'],
+    tip: '입장(대개 "적절한 규제 필요") → 위험 예시 → 과도한 규제의 문제 → 균형 잡힌 결론.',
+    model: "I believe some regulation is necessary, but it should be balanced. AI is becoming very powerful, and without rules, it could be used to spread misinformation, violate privacy, or make unfair decisions in areas like hiring or loans. Clear rules would also help people trust AI more. However, if regulations are too strict, they could slow down innovation, and companies in other countries might move ahead. So I think governments should focus on high-risk areas first and work closely with companies and experts to create practical rules.",
+    keys: [['it should be balanced', '균형이 잡혀야 해요'], ['violate privacy', '사생활을 침해하다'], ['slow down innovation', '혁신을 늦추다'], ['high-risk areas', '고위험 분야']]
+  },
+  {
+    id: 'x8', cat: 'issue', lv: 5,
+    q: 'Chinese car makers are growing very fast. How can Korean companies stay competitive?',
+    ko: '중국 자동차 회사들이 빠르게 성장하고 있어요. 한국 기업은 어떻게 경쟁력을 유지할 수 있을까요?',
+    follow: ['What are the strengths of Chinese car makers?', 'Should Korean companies cooperate with Chinese companies?'],
+    tip: '상황 분석(중국의 강점: 가격·배터리·속도) → 우리의 대응 2~3가지 → 결론. 산업 어휘를 활용하세요.',
+    model: "Chinese car makers have strong advantages, especially in battery costs and development speed. They can launch new models much faster and at lower prices. To stay competitive, Korean companies can't win on price alone. First, we need to focus on quality, safety, and brand trust, which take a long time to build. Second, we should speed up development by using more software and digital tools. Third, we need to secure our own battery supply chain. I think if we combine our reputation for quality with faster innovation, we can stay ahead.",
+    keys: [['have strong advantages in ~', '~에서 강한 우위가 있다'], ['can\'t win on price alone', '가격만으로는 이길 수 없다'], ['secure a supply chain', '공급망을 확보하다'], ['stay ahead', '앞서 나가다']]
+  },
+  {
+    id: 'x9', cat: 'issue', lv: 5,
+    q: 'How will smart factories and automation change manufacturing jobs?',
+    ko: '스마트 공장과 자동화는 제조업 일자리를 어떻게 바꿀까요?',
+    follow: ['What skills will factory workers need in the future?', 'Who should pay for retraining workers?'],
+    tip: '변화(단순 작업 감소, 새 직무 등장) → 장점·우려 → 대응(재교육). 원인-결과 표현을 쓰세요.',
+    model: "Smart factories will definitely reduce the number of simple, repetitive jobs, because robots and AI can do them faster and more accurately. For example, in our plants, many inspection tasks are already done by cameras and AI. However, new jobs will also appear, such as maintaining robots, analyzing production data, and managing automated systems. The problem is that workers can't change their skills overnight. So companies and the government need to invest in retraining programs, so that experienced workers can move into these new roles.",
+    keys: [['more accurately', '더 정확하게'], ['new jobs will appear', '새로운 일자리가 생길 거예요'], ['overnight', '하룻밤 사이에'], ['retraining programs', '재교육 프로그램']]
+  },
+  {
+    id: 'x10', cat: 'issue', lv: 5,
+    q: 'What do you think is the most important quality for a global company to succeed in different countries?',
+    ko: '글로벌 기업이 여러 나라에서 성공하려면 가장 중요한 자질은 무엇일까요?',
+    follow: ['Can you give an example of a company that failed abroad?', 'How does your company adapt to local markets?'],
+    tip: '자질 하나(현지화) → 이유 → 회사 사례 → 정리. "think global, act local" 같은 표현을 써 보세요.',
+    model: "In my opinion, the most important quality is the ability to adapt to local markets. Customers in each country have different tastes, needs, and regulations. A product that is popular in Korea might not sell at all in India or Europe. For example, my company designs some models specifically for the Indian market, with more space and stronger air conditioning for the hot weather, and they've been very successful. So I think global companies should think globally but act locally, and hire local people who truly understand the market.",
+    keys: [['adapt to local markets', '현지 시장에 적응하다'], ['might not sell at all', '전혀 안 팔릴 수도 있다'], ['specifically for ~', '특별히 ~을 위해'], ['think globally but act locally', '생각은 세계적으로, 행동은 현지에 맞게']]
   }
 ];
